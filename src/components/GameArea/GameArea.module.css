@@ -1,0 +1,4 @@
+.area {
+	--area-max: 45rem;
+	width: min(100cqmin, var(--area-max));
+}
