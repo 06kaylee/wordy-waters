@@ -1,4 +1,10 @@
-import { WORDS } from "../../data/puzzleData";
+import {
+	getWordCells,
+	getWordDataByName,
+	wordOwners,
+	WORDS,
+	type WordCell,
+} from "../../data/puzzleData";
 
 export type CellState = "hidden" | "discovered" | "revealed" | "empty";
 
@@ -28,33 +34,18 @@ export type GameAction =
 	| { type: "CELL_CLICKED"; payload: { row: number; col: number } }
 	| { type: "GUESS_SUBMITTED"; payload: { guess: string } };
 
-function getWordAtCell(row: number, col: number): string | null {
-	// loop through WORDS
-	for (const wordData of WORDS) {
-		const { direction, startCol, startRow, word } = wordData;
-		// for each word, loop through its cells
-		for (let i = 0; i < word.length; i++) {
-			let currentRow: number = startRow;
-			let currentCol: number = startCol;
-			if (direction === "vertical") {
-				// row increases, col stays the same
-				currentRow += i;
-			} else if (direction === "horizontal") {
-				// row stays the same, col increases
-				currentCol += i;
-			} else {
-				// both increase
-				currentRow += i;
-				currentCol += i;
-			}
-
-			// if row and col match, return the word
-			if (row === currentRow && col === currentCol) {
-				return word;
-			}
-		}
-	}
-	return null;
+function setCellStates(
+	cellStates: CellState[][],
+	newCellState: CellState,
+	cells: WordCell[],
+): CellState[][] {
+	return cellStates.map((row, rowIndex) =>
+		row.map((cell, colIndex) =>
+			cells.some((cell) => cell.row === rowIndex && cell.col === colIndex)
+				? newCellState
+				: cell,
+		),
+	);
 }
 
 export function gameReducer(state: GameState, action: GameAction) {
@@ -63,19 +54,12 @@ export function gameReducer(state: GameState, action: GameAction) {
 			const cellState =
 				state.cellStates[action.payload.row][action.payload.col];
 			if (cellState === "hidden") {
-				const wordAtCell = getWordAtCell(
-					action.payload.row,
-					action.payload.col,
-				);
+				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
 
 				const newCellState = wordAtCell ? "discovered" : "empty";
-				const newCellStates = state.cellStates.map((row, rowIndex) =>
-					row.map((cell, colIndex) =>
-						action.payload.row === rowIndex && action.payload.col === colIndex
-							? newCellState
-							: cell,
-					),
-				);
+				const newCellStates = setCellStates(state.cellStates, newCellState, [
+					{ row: action.payload.row, col: action.payload.col },
+				]);
 
 				return {
 					...state,
@@ -84,23 +68,23 @@ export function gameReducer(state: GameState, action: GameAction) {
 					activeWord: wordAtCell,
 				};
 			} else if (cellState === "discovered") {
-				const wordAtCell = getWordAtCell(
-					action.payload.row,
-					action.payload.col,
-				);
+				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
 
 				return {
 					...state,
 					activeWord: wordAtCell,
 				};
 			}
-			return { ...state };
+			return state;
 		}
 		case "GUESS_SUBMITTED": {
-			if (!state.activeWord) return { ...state };
+			if (!state.activeWord) return state;
+			const isGuessedCorrectly = action.payload.guess === state.activeWord;
+			const wordData = getWordDataByName(state.activeWord);
+			if (!wordData) return state;
+			const wordCells = getWordCells(wordData);
 			// guessed correctly -> set cell state to revealed. all cell states of the word?
 			// guessed correctly -> word state's isGuessedCorrectly needs to be true
-			const isGuessedCorrectly = action.payload.guess === state.activeWord;
 			console.log(state);
 			console.log(action);
 			return {
@@ -112,10 +96,13 @@ export function gameReducer(state: GameState, action: GameAction) {
 						isGuessedCorrectly,
 					},
 				},
+				cellStates: isGuessedCorrectly
+					? setCellStates(state.cellStates, "revealed", wordCells)
+					: state.cellStates,
 			};
 		}
 		default: {
-			return { ...state };
+			return state;
 		}
 	}
 }
