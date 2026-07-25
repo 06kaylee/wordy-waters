@@ -37,11 +37,13 @@ export type GameAction =
 function setCellStates(
 	cellStates: CellState[][],
 	newCellState: CellState,
-	cells: WordCell[],
+	wordCells: WordCell[],
 ): CellState[][] {
 	return cellStates.map((row, rowIndex) =>
 		row.map((cell, colIndex) =>
-			cells.some((cell) => cell.row === rowIndex && cell.col === colIndex)
+			wordCells.some(
+				(wordCell) => wordCell.row === rowIndex && wordCell.col === colIndex,
+			)
 				? newCellState
 				: cell,
 		),
@@ -78,15 +80,16 @@ export function gameReducer(state: GameState, action: GameAction) {
 			return state;
 		}
 		case "GUESS_SUBMITTED": {
-			if (!state.activeWord) return state;
+			if (
+				!state.activeWord ||
+				state.wordStates[state.activeWord].isGuessedCorrectly
+			) {
+				return state;
+			}
 			const isGuessedCorrectly = action.payload.guess === state.activeWord;
 			const wordData = getWordDataByName(state.activeWord);
 			if (!wordData) return state;
 			const wordCells = getWordCells(wordData);
-			// guessed correctly -> set cell state to revealed. all cell states of the word?
-			// guessed correctly -> word state's isGuessedCorrectly needs to be true
-			console.log(state);
-			console.log(action);
 			return {
 				...state,
 				movesUsed: isGuessedCorrectly ? state.movesUsed : state.movesUsed + 2,
