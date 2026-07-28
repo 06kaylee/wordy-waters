@@ -19,7 +19,7 @@ function Cell({ value, onCellClick, cellState }: CellProps) {
 			)}
 			onClick={onCellClick}
 		>
-			{cellState === "hidden" ? "" : value}
+			{cellState !== "revealed" ? "" : value}
 		</div>
 	);
 }

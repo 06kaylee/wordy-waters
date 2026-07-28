@@ -1,4 +1,4 @@
-import { board, getWordCells, wordOwners, WORDS } from "../data/puzzleData";
+import { board } from "../data/puzzleData";
 import Cell from "./Cell";
 import type { CellState, GameAction } from "./GameArea/gameReducer";
 
@@ -8,9 +8,6 @@ interface GameBoardProps {
 }
 
 function GameBoard({ dispatch, cellStates }: GameBoardProps) {
-	const word = WORDS[1];
-	console.log(getWordCells(word));
-	console.log(wordOwners);
 	return (
 		<div className="grid grid-cols-5 gap-2 aspect-square w-full">
 			{board.map((row, rowIndex) =>

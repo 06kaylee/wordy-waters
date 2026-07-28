@@ -86,7 +86,8 @@ export function gameReducer(state: GameState, action: GameAction) {
 			) {
 				return state;
 			}
-			const isGuessedCorrectly = action.payload.guess === state.activeWord;
+			const isGuessedCorrectly =
+				action.payload.guess.trim().toUpperCase() === state.activeWord;
 			const wordData = getWordDataByName(state.activeWord);
 			if (!wordData) return state;
 			const wordCells = getWordCells(wordData);
