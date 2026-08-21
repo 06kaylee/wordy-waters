@@ -1,8 +1,16 @@
-function GameStats() {
+interface GameStatsProps {
+	movesRemaining: number;
+	wordsFound: number;
+	totalWords: number;
+}
+
+function GameStats({ movesRemaining, wordsFound, totalWords }: GameStatsProps) {
 	return (
 		<div className="flex justify-between">
-			<p>Moves used: </p>
-			<p>Words found: 0 / 5 </p>
+			<p>Moves remaining: {movesRemaining}</p>
+			<p>
+				Words found: {wordsFound} / {totalWords}
+			</p>
 		</div>
 	);
 }

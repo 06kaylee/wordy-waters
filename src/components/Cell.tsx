@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import type { CellState } from "./GameArea/gameReducer";
+import type { CellState } from "../game/gameTypes";
 
 interface CellProps {
 	value: string;

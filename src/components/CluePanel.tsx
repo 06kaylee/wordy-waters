@@ -1,14 +1,18 @@
 import { useState } from "react";
-import { type GameAction } from "./GameArea/gameReducer";
-import type { ActiveWordView } from "./GameArea/gameSelectors";
+import type { ActiveWordView } from "../game/gameSelectors";
+import type { GameAction } from "../game/gameTypes";
 
 interface CluePanelProps {
-	activeWordView: ActiveWordView;
+	activeWordView: ActiveWordView | null;
 	dispatch: React.Dispatch<GameAction>;
 }
 
 function CluePanel({ activeWordView, dispatch }: CluePanelProps) {
 	const [guess, setGuess] = useState<string>("");
+	if (!activeWordView) {
+		return <p>Keep hunting for clues</p>;
+	}
+
 	const { word, shownClues, isSolved } = activeWordView;
 
 	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {

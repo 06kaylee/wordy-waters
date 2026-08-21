@@ -4,20 +4,9 @@ import {
 	wordOwners,
 	WORDS,
 	type WordCell,
-} from "../../data/puzzleData";
-
-export type CellState = "hidden" | "discovered" | "revealed" | "empty";
-
-export type WordState = {
-	isGuessedCorrectly: boolean;
-};
-
-export type GameState = {
-	cellStates: CellState[][];
-	wordStates: Record<string, WordState>;
-	movesUsed: number;
-	activeWord: string | null;
-};
+} from "../data/puzzleData";
+import { selectGameStatus, selectMovesRemaining } from "./gameSelectors";
+import type { CellState, GameAction, GameState } from "./gameTypes";
 
 export const initialGameState: GameState = {
 	cellStates: Array.from({ length: 5 }, () =>
@@ -29,10 +18,6 @@ export const initialGameState: GameState = {
 	movesUsed: 0,
 	activeWord: null,
 };
-
-export type GameAction =
-	| { type: "CELL_CLICKED"; payload: { row: number; col: number } }
-	| { type: "GUESS_SUBMITTED"; payload: { guess: string } };
 
 function setCellStates(
 	cellStates: CellState[][],
@@ -50,12 +35,22 @@ function setCellStates(
 	);
 }
 
-export function gameReducer(state: GameState, action: GameAction) {
+export function gameReducer(state: GameState, action: GameAction): GameState {
 	switch (action.type) {
 		case "CELL_CLICKED": {
 			const cellState =
 				state.cellStates[action.payload.row][action.payload.col];
-			if (cellState === "hidden") {
+			if (selectGameStatus(state) !== "playing") {
+				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
+
+				if (!wordAtCell) return state;
+
+				return {
+					...state,
+					activeWord: wordAtCell,
+				};
+			} else if (cellState === "hidden") {
+				if (selectMovesRemaining(state) === 0) return state;
 				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
 
 				const newCellState = wordAtCell ? "discovered" : "empty";
@@ -67,10 +62,12 @@ export function gameReducer(state: GameState, action: GameAction) {
 					...state,
 					cellStates: newCellStates,
 					movesUsed: state.movesUsed + 1,
-					activeWord: wordAtCell,
+					activeWord: wordAtCell ?? state.activeWord,
 				};
-			} else if (cellState === "discovered") {
+			} else if (cellState === "discovered" || cellState === "revealed") {
 				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
+
+				if (!wordAtCell) return state;
 
 				return {
 					...state,
@@ -82,7 +79,8 @@ export function gameReducer(state: GameState, action: GameAction) {
 		case "GUESS_SUBMITTED": {
 			if (
 				!state.activeWord ||
-				state.wordStates[state.activeWord].isGuessedCorrectly
+				state.wordStates[state.activeWord].isGuessedCorrectly ||
+				selectGameStatus(state) !== "playing"
 			) {
 				return state;
 			}

@@ -12,7 +12,8 @@ export type WordCell = {
 	col: number;
 };
 
-export const MOVE_BUDGET: number = 20;
+export const TOTAL_MOVES = 20;
+
 const DIRECTION_DELTAS = {
 	horizontal: [0, 1],
 	vertical: [1, 0],
@@ -33,8 +34,8 @@ function buildBoard(words: WordData[]) {
 	const board = Array.from({ length: 5 }, () =>
 		Array.from({ length: 5 }, () => ""),
 	);
-	const wordOwners = Array.from({ length: 5 }, () =>
-		Array.from({ length: 5 }, () => ""),
+	const wordOwners: (string | null)[][] = Array.from({ length: 5 }, () =>
+		Array.from({ length: 5 }, () => null),
 	);
 
 	words.forEach((wordData) => {
