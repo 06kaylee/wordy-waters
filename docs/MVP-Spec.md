@@ -23,8 +23,12 @@ crossword-style clues, then guess the words.
 6. Player guesses the word, or discovers more cells to earn more clues.
 7. Correct guess = word revealed on board with letter-by-letter animation.
 8. Wrong guess = 2 moves are subtracted from the player's remaining budget.
-9. Move budget exhausted with unguessed words = lose.
-10. Guess all 4 words = win.
+9. Move budget exhausted with discovered-but-unguessed words = Sudden
+   Death: guess discovered words one at a time; correct guesses are free
+   and let you continue, the first wrong guess ends the game.
+10. Lose when Sudden Death ends (wrong guess, or no discovered words left
+    to guess) with unguessed words remaining.
+11. Guess all 4 words = win (during normal play or Sudden Death).
 
 ### Board Layout
 
@@ -64,10 +68,24 @@ Final score = total moves used. Lower is better.
 Guess all 4 words. Display: move count + score rating + countdown to next
 puzzle.
 
+### Sudden Death
+
+Move budget exhausted (including overshoot below zero from a wrong-guess
+penalty) with at least one discovered, unguessed word → the game enters
+Sudden Death instead of ending. One guess at a time on discovered words;
+correct = free, continue guessing; first wrong guess = immediate loss.
+Winning via Sudden Death uses the normal score rating (full budget spent,
+so it rates in the bottom tier). See GDD §8.3 for full rules and rationale.
+
+Implementation note: game status needs an explicit phase (e.g.
+`'playing' | 'sudden_death' | 'won' | 'lost'`) — loss is no longer a
+pure `moves_used >= budget` check.
+
 ### Lose
 
-Move budget exhausted with at least one word unguessed. Display: words
-found vs total, moves used, invite to try again tomorrow.
+Sudden Death ends with at least one word unguessed — via a wrong guess, or
+by running out of discovered words to guess (including entering with none).
+Display: words found vs total, moves used, invite to try again tomorrow.
 
 ## Daily Puzzle Rules
 
@@ -103,7 +121,7 @@ React + TypeScript
 ```sql
 CREATE TABLE games (
   id UUID PRIMARY KEY,
-  status VARCHAR(20) NOT NULL,        -- 'in_progress' | 'won' | 'lost'
+  status VARCHAR(20) NOT NULL,        -- 'playing' | 'sudden_death' | 'won' | 'lost'
   moves_used INTEGER DEFAULT 0,       -- total moves spent this session
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
   completed_at TIMESTAMP

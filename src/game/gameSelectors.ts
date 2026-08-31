@@ -22,10 +22,11 @@ export function selectActiveWordView(state: GameState): ActiveWordView | null {
 	);
 	const numDiscovered = wordCellStates.filter(
 		(wordCellState) => wordCellState === "discovered",
-	)?.length;
+	).length;
 	const isSolved = state.wordStates[state.activeWord].isGuessedCorrectly;
+	const gameStatus = selectGameStatus(state);
 	const shownClues =
-		isSolved || selectGameStatus(state) !== "playing"
+		isSolved || isGameOver(gameStatus)
 			? allClues
 			: allClues.slice(0, numDiscovered);
 	return {
@@ -46,10 +47,18 @@ export function selectWordsFound(state: GameState): number {
 }
 
 export function selectGameStatus(state: GameState): GameStatus {
+	if (state.lostInSuddenDeath) return "lost";
 	const allWordsGuessedCorrectly = Object.values(state.wordStates).every(
 		(wordState) => wordState.isGuessedCorrectly,
 	);
 	if (allWordsGuessedCorrectly) return "won";
-	if (state.movesUsed > TOTAL_MOVES) return "lost";
+	if (state.movesUsed >= TOTAL_MOVES) {
+		if (state.cellStates.flat().some((cellState) => cellState === "discovered"))
+			return "sudden_death";
+		return "lost";
+	}
 	return "playing";
 }
+
+export const isGameOver = (gameStatus: GameStatus) =>
+	gameStatus === "won" || gameStatus === "lost";

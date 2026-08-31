@@ -32,7 +32,9 @@ Each daily session follows this sequence:
   letter-by-letter animation.
 - A wrong guess costs 2 additional moves. The discovered cells remain
   visible so the player remembers they already guessed there.
-- Guess all 4 words before moves run out to win. Run out of moves = loss.
+- Guess all 4 words to win. Running out of moves triggers Sudden Death
+  (Section 8.3): one-at-a-time guesses on discovered words, where the first
+  wrong guess — or running out of discovered words — ends the game.
 
 ## 3. Move Budget System
 
@@ -161,13 +163,49 @@ exhausted. On win, the screen displays:
 
 ### 8.2 Loss
 
-The player loses when their move budget reaches zero with at least one word
-unguessed. On loss, the board is fully revealed and the player sees which
-words they missed. The screen displays:
+Exhausting the move budget no longer loses immediately — it triggers Sudden
+Death (Section 8.3). The player loses when:
+
+- They guess wrong during Sudden Death, or
+- Sudden Death begins (or runs out of guessable words) with at least one
+  word unguessed and no discovered, unguessed words left to attempt.
+
+On loss, the board is fully revealed and the player sees which words they
+missed. The screen displays:
 
 - Words found vs. total (e.g. "2 of 4 words found")
 - Moves used
 - Invite to try again tomorrow
+
+### 8.3 Sudden Death
+
+When moves remaining reaches zero (or overshoots below zero via a
+wrong-guess penalty — overshooting does not skip Sudden Death) and at least
+one discovered word remains unguessed, the game enters Sudden Death instead
+of ending:
+
+- The player may guess any discovered-but-unguessed word, one at a time.
+- A correct guess costs nothing — the player continues and may guess the
+  next discovered word.
+- The first wrong guess ends the game immediately as a loss.
+- If no discovered, unguessed words remain and not all words are guessed,
+  the game ends as a loss.
+- Guessing all remaining words in Sudden Death is a win. It uses the normal
+  score rating — by definition the full budget was spent, so these wins
+  naturally rate at the bottom tier.
+
+**Design rationale:** clues the player earned through exploration stay
+usable — the game never ends while the player holds paid-for information
+they were forbidden to act on ("every action returns meaningful
+information"). It also creates a clutch, shareable endgame beat. The
+hoarding strategy (explore everything, guess nothing until Sudden Death) is
+self-limited: confident guesses are already free mid-game, Sudden Death is
+a no-miss gauntlet, and score = moves used, so hoarded wins always rate
+"Barely Survived."
+
+**Playtest watch item:** if streak-focused players make
+"hoard exploration, quiz at the end" the dominant strategy, the fallback
+nerf is capping Sudden Death at one guess total (player picks the word).
 
 ## 10. Board Specification (MVP)
 
@@ -222,7 +260,11 @@ implementation.
 - Words remaining → count `isGuessedCorrectly: false` entries in `wordStates`
 - Clues revealed for a word → count how many of that word's cells are `discovered`
 - Win condition → all words have `isGuessedCorrectly: true`
-- Loss condition → `movesUsed >= budget` with words still unguessed
+- Sudden Death entry → `movesUsed >= budget` with ≥1 discovered, unguessed
+  word (a game-phase value in state, e.g. `playing | suddenDeath | won |
+  lost` — not derivable from the budget check alone)
+- Loss condition → wrong guess during Sudden Death, or `movesUsed >= budget`
+  with no discovered, unguessed words left and words still unguessed
 - Score rating → calculated from `movesUsed` at game end
 
 ### 11.4 Board Data (static, separate from game state)

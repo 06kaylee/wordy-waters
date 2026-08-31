@@ -5,7 +5,7 @@ import {
 	WORDS,
 	type WordCell,
 } from "../data/puzzleData";
-import { selectGameStatus, selectMovesRemaining } from "./gameSelectors";
+import { isGameOver, selectGameStatus } from "./gameSelectors";
 import type { CellState, GameAction, GameState } from "./gameTypes";
 
 export const initialGameState: GameState = {
@@ -17,6 +17,7 @@ export const initialGameState: GameState = {
 	),
 	movesUsed: 0,
 	activeWord: null,
+	lostInSuddenDeath: false,
 };
 
 function setCellStates(
@@ -36,11 +37,12 @@ function setCellStates(
 }
 
 export function gameReducer(state: GameState, action: GameAction): GameState {
+	const gameStatus = selectGameStatus(state);
 	switch (action.type) {
 		case "CELL_CLICKED": {
 			const cellState =
 				state.cellStates[action.payload.row][action.payload.col];
-			if (selectGameStatus(state) !== "playing") {
+			if (isGameOver(gameStatus)) {
 				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
 
 				if (!wordAtCell) return state;
@@ -50,7 +52,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 					activeWord: wordAtCell,
 				};
 			} else if (cellState === "hidden") {
-				if (selectMovesRemaining(state) === 0) return state;
+				if (gameStatus === "sudden_death") return state;
 				const wordAtCell = wordOwners[action.payload.row][action.payload.col];
 
 				const newCellState = wordAtCell ? "discovered" : "empty";
@@ -80,7 +82,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 			if (
 				!state.activeWord ||
 				state.wordStates[state.activeWord].isGuessedCorrectly ||
-				selectGameStatus(state) !== "playing"
+				gameStatus === "won" ||
+				gameStatus === "lost"
 			) {
 				return state;
 			}
@@ -101,6 +104,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
 				cellStates: isGuessedCorrectly
 					? setCellStates(state.cellStates, "revealed", wordCells)
 					: state.cellStates,
+				lostInSuddenDeath: !isGuessedCorrectly && gameStatus === "sudden_death",
 			};
 		}
 		default: {

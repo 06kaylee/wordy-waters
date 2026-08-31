@@ -1,13 +1,14 @@
 import { useState } from "react";
-import type { ActiveWordView } from "../game/gameSelectors";
-import type { GameAction } from "../game/gameTypes";
+import { isGameOver, type ActiveWordView } from "../game/gameSelectors";
+import type { GameAction, GameStatus } from "../game/gameTypes";
 
 interface CluePanelProps {
 	activeWordView: ActiveWordView | null;
 	dispatch: React.Dispatch<GameAction>;
+	gameStatus: GameStatus;
 }
 
-function CluePanel({ activeWordView, dispatch }: CluePanelProps) {
+function CluePanel({ activeWordView, dispatch, gameStatus }: CluePanelProps) {
 	const [guess, setGuess] = useState<string>("");
 	if (!activeWordView) {
 		return <p>Keep hunting for clues</p>;
@@ -21,6 +22,9 @@ function CluePanel({ activeWordView, dispatch }: CluePanelProps) {
 		setGuess("");
 	};
 
+	const isGuessingDone = isSolved || isGameOver(gameStatus);
+	const resultText = isSolved ? "Correct! Answer:" : "The word was:";
+
 	return (
 		<div>
 			<div>
@@ -31,11 +35,14 @@ function CluePanel({ activeWordView, dispatch }: CluePanelProps) {
 					))}
 				</ul>
 			</div>
-			{isSolved ? (
+			{isGuessingDone && (
 				<div>
-					<p>Correct! Answer: {word}</p>
+					<p>
+						{resultText} {word}
+					</p>
 				</div>
-			) : (
+			)}
+			{!isGuessingDone && (
 				<form onSubmit={handleSubmit}>
 					<input
 						type="text"

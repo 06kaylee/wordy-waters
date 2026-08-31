@@ -1,6 +1,7 @@
 import { board } from "../data/puzzleData";
 import Cell from "./Cell";
 import type { CellState, GameAction, GameStatus } from "../game/gameTypes";
+import { isGameOver } from "../game/gameSelectors";
 
 interface GameBoardProps {
 	dispatch: React.Dispatch<GameAction>;
@@ -27,7 +28,7 @@ function GameBoard({ dispatch, cellStates, gameStatus }: GameBoardProps) {
 								})
 							}
 							cellState={
-								gameStatus !== "playing"
+								isGameOver(gameStatus)
 									? gameOverCellState
 									: cellStates[rowIndex][colIndex]
 							}
