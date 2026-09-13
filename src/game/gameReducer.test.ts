@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { gameReducer, initialGameState } from "./gameReducer";
 import type { GameAction, GameState } from "./gameTypes";
-import { selectGameStatus } from "./gameSelectors";
+import { selectGameStatus, selectWordsFound } from "./gameSelectors";
 
 // Test board layout (see puzzleData.ts):
 // MINT vertical [0,0]-[3,0], LEAD horizontal [4,0]-[4,3],
@@ -38,6 +38,19 @@ function buildSuddenDeathState(): GameState {
 // LEAD are never discovered, so their cells stay hidden after the loss.
 function buildLostState(): GameState {
 	return playActions([guess("XXXX")], buildSuddenDeathState());
+}
+
+function buildWinState(): GameState {
+	return playActions([
+		click(0, 0),
+		guess("MINT"),
+		click(4, 0),
+		guess("LEAD"),
+		click(1, 1),
+		guess("PLAN"),
+		click(0, 4),
+		guess("BARK"),
+	]);
 }
 
 describe("gameReducer", () => {
@@ -123,6 +136,12 @@ describe("gameReducer", () => {
 			]);
 			const gameState = gameReducer(solvedState, guess("test"));
 			expect(gameState).toBe(solvedState);
+		});
+		it("wins the game if all words have been guessed correctly", () => {
+			const winState = buildWinState();
+			expect(selectGameStatus(winState)).toBe("won");
+			expect(winState.movesUsed).toBe(4);
+			expect(selectWordsFound(winState)).toBe(4);
 		});
 	});
 });
