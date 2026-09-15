@@ -14,10 +14,15 @@ import {
 import { WORDS } from "../../data/puzzleData";
 import SuddenDeathModal from "../SuddenDeathModal";
 import GameOverModal from "../GameOverModal";
+import HowToPlayModal from "../HowToPlayModal";
 
 function GameArea() {
 	const [state, dispatch] = useReducer(gameReducer, initialGameState);
 	const [isGameOverModalOpen, setIsGameOverModalOpen] = useState(false);
+	const [showHowToPlayModal, setShowHowToPlayModal] = useState(() => {
+		const currentValue = localStorage.getItem("showHowToPlayModal");
+		return currentValue ? JSON.parse(currentValue) : true;
+	});
 	const activeWordView = selectActiveWordView(state);
 	const movesRemaining = selectMovesRemaining(state);
 	const gameStatus = selectGameStatus(state);
@@ -32,6 +37,11 @@ function GameArea() {
 		return () => clearTimeout(timeout);
 	}, [gameOver]);
 
+	function handleHowToPlayModalClose() {
+		localStorage.setItem("showHowToPlayModal", "false");
+		setShowHowToPlayModal(false);
+	}
+
 	return (
 		<div className={`${styles.area} grid gap-6`}>
 			{gameStatus === "sudden_death" && <SuddenDeathModal />}
@@ -43,6 +53,10 @@ function GameArea() {
 			)}
 			{gameOver && (
 				<button onClick={() => setIsGameOverModalOpen(true)}>Results</button>
+			)}
+			<button onClick={() => setShowHowToPlayModal(true)}>How to Play</button>
+			{showHowToPlayModal && (
+				<HowToPlayModal onClose={handleHowToPlayModalClose} />
 			)}
 			<GameStats
 				wordsFound={wordsFound}

@@ -212,28 +212,24 @@ nerf is capping Sudden Death at one guess total (player picks the word).
 The MVP uses a single hardcoded puzzle for testing. All production puzzles
 will follow this layout structure.
 
-Note: The board was redesigned to resolve a cell conflict in the original
-spec. PLAN runs diagonally to eliminate the overlap with BARK at cell
-`[1,4]`.
-
 ### 10.1 Grid
 
 |       | Col 0 | Col 1 | Col 2 | Col 3 | Col 4 |
 | ----- | ----- | ----- | ----- | ----- | ----- |
-| Row 0 | M     | —     | —     | —     | B     |
-| Row 1 | I     | P     | —     | —     | A     |
-| Row 2 | N     | —     | L     | —     | R     |
-| Row 3 | T     | —     | —     | A     | K     |
-| Row 4 | L     | E     | A     | D     | N     |
+| Row 0 | M     | —     | —     | J     | B     |
+| Row 1 | I     | —     | —     | A     | A     |
+| Row 2 | N     | —     | —     | M     | R     |
+| Row 3 | T     | —     | —     | —     | K     |
+| Row 4 | O     | C     | E     | A     | N     |
 
 ### 10.2 Words & Clues
 
-| Word | Start | Direction  | Clue 1                   | Clue 2                     | Clue 3                    |
-| ---- | ----- | ---------- | ------------------------ | -------------------------- | ------------------------- |
-| MINT | [0,0] | Vertical   | In perfect condition (4) | Place that makes coins (4) | Fresh herb (4)            |
-| PLAN | [1,1] | Diagonal   | Drawing or blueprint (4) | Strategy or scheme (4)     | To arrange in advance (4) |
-| LEAD | [4,0] | Horizontal | Heavy metal (4)          | Leash for a dog (4)        | Go first (4)              |
-| BARK | [0,4] | Vertical   | Sailing vessel (4)       | Dog's sound (4)            | Tree's outer layer (4)    |
+| Word  | Start | Direction  | Clue 1                   | Clue 2                           | Clue 3                            |
+| ----- | ----- | ---------- | ------------------------ | -------------------------------- | --------------------------------- |
+| MINT  | [0,0] | Vertical   | In perfect condition (4) | Place that makes coins (4)       | Fresh herb (4)                    |
+| JAM   | [0,3] | Vertical   | Sticky situation (3)     | Musicians' impromptu session (3) | Fruit spread for toast (3)        |
+| OCEAN | [4,0] | Horizontal | A drop in the \_\_\_ (5) | Pacific or Atlantic (5)          | Very large body of salt water (5) |
+| BARK  | [0,4] | Vertical   | Sailing vessel (4)       | Dog's sound (4)                  | Tree's outer layer (4)            |
 
 ## 11. Frontend State Design
 
@@ -262,7 +258,7 @@ implementation.
 - Win condition → all words have `isGuessedCorrectly: true`
 - Sudden Death entry → `movesUsed >= budget` with ≥1 discovered, unguessed
   word (a game-phase value in state, e.g. `playing | suddenDeath | won |
-  lost` — not derivable from the budget check alone)
+lost` — not derivable from the budget check alone)
 - Loss condition → wrong guess during Sudden Death, or `movesUsed >= budget`
   with no discovered, unguessed words left and words still unguessed
 - Score rating → calculated from `movesUsed` at game end
@@ -273,7 +269,7 @@ A static `WORDS` constant holds the definition of each word. The reducer
 references this to answer "which word does this cell belong to?"
 
 Each word entry contains: `word` (string), `startRow`, `startCol`,
-`direction` (`'horizontal' | 'vertical' | 'diagonal'`), `length`, and
+`direction` (`'horizontal' | 'vertical'`), and
 `clues` array.
 
 Cell membership is calculated algorithmically from `startRow`, `startCol`,

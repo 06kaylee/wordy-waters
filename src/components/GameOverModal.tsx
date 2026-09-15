@@ -12,9 +12,8 @@ export default function GameOverModal({
 }: GameOverModalProps) {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 	useEffect(() => {
-		const dialog = dialogRef.current;
-		if (!dialog?.open) {
-			dialog?.showModal();
+		if (!dialogRef?.current?.open) {
+			dialogRef?.current?.showModal();
 		}
 	}, []);
 

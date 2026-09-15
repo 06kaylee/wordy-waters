@@ -4,9 +4,9 @@ export default function SuddenDeathModal() {
 	const dialogRef = useRef<HTMLDialogElement>(null);
 
 	useEffect(() => {
-		const dialog = dialogRef.current;
-		dialog?.showModal();
-		return () => dialog?.close();
+		if (!dialogRef?.current?.open) {
+			dialogRef?.current?.showModal();
+		}
 	}, []);
 
 	function handleClose() {

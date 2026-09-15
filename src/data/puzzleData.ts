@@ -2,8 +2,7 @@ export type WordData = {
 	word: string;
 	startRow: number;
 	startCol: number;
-	direction: "horizontal" | "vertical" | "diagonal";
-	length: number;
+	direction: "horizontal" | "vertical";
 	clues: string[];
 };
 
@@ -17,7 +16,6 @@ export const TOTAL_MOVES = 20;
 const DIRECTION_DELTAS = {
 	horizontal: [0, 1],
 	vertical: [1, 0],
-	diagonal: [1, 1],
 };
 
 // takes a WordData object and returns the array rows and cols that the cells live for that word
@@ -54,27 +52,28 @@ export const WORDS: WordData[] = [
 		startRow: 0,
 		startCol: 0,
 		direction: "vertical",
-		length: 4,
 		clues: ["In perfect condition", "Place that makes coins", "Fresh herb"],
 	},
 	{
-		word: "LEAD",
+		word: "OCEAN",
 		startRow: 4,
 		startCol: 0,
 		direction: "horizontal",
-		length: 4,
-		clues: ["Heavy metal", "Leash for a dog", "Go first"],
+		clues: [
+			"A drop in the ___",
+			"Pacific or Atlantic",
+			"Very large body of salt water",
+		],
 	},
 	{
-		word: "PLAN",
-		startRow: 1,
-		startCol: 1,
-		direction: "diagonal",
-		length: 4,
+		word: "JAM",
+		startRow: 0,
+		startCol: 3,
+		direction: "vertical",
 		clues: [
-			"Drawing or blueprint",
-			"Strategy or scheme",
-			"To arrange in advance",
+			"Sticky situation",
+			"Musicians' impromptu session",
+			"Fruit spread for toast",
 		],
 	},
 	{
@@ -82,7 +81,6 @@ export const WORDS: WordData[] = [
 		startRow: 0,
 		startCol: 4,
 		direction: "vertical",
-		length: 4,
 		clues: ["Sailing vessel", "Dog's sound", "Tree's outer layer"],
 	},
 ];

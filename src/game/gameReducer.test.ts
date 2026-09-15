@@ -4,8 +4,8 @@ import type { GameAction, GameState } from "./gameTypes";
 import { selectGameStatus, selectWordsFound } from "./gameSelectors";
 
 // Test board layout (see puzzleData.ts):
-// MINT vertical [0,0]-[3,0], LEAD horizontal [4,0]-[4,3],
-// PLAN diagonal [1,1]-[4,4], BARK vertical [0,4]-[3,4]
+// MINT vertical [0,0]-[3,0], OCEAN horizontal [4,0]-[4,4],
+// JAM vertical [0,3]-[2,3], BARK vertical [0,4]-[3,4]
 // [0,1] is empty
 
 const click = (row: number, col: number): GameAction => ({
@@ -34,8 +34,8 @@ function buildSuddenDeathState(): GameState {
 	]);
 }
 
-// A wrong guess made during sudden death loses the game. BARK, PLAN, and
-// LEAD are never discovered, so their cells stay hidden after the loss.
+// A wrong guess made during sudden death loses the game. BARK, JAM, and
+// OCEAN are never discovered, so their cells stay hidden after the loss.
 function buildLostState(): GameState {
 	return playActions([guess("XXXX")], buildSuddenDeathState());
 }
@@ -45,9 +45,9 @@ function buildWinState(): GameState {
 		click(0, 0),
 		guess("MINT"),
 		click(4, 0),
-		guess("LEAD"),
-		click(1, 1),
-		guess("PLAN"),
+		guess("OCEAN"),
+		click(0, 3),
+		guess("JAM"),
 		click(0, 4),
 		guess("BARK"),
 	]);
@@ -71,7 +71,7 @@ describe("gameReducer", () => {
 			expect(gameState.activeWord).toBe("MINT");
 		});
 		it("costs 0 moves to re-click a discovered cell and makes its word active", () => {
-			// Discover MINT, then LEAD (making LEAD active), then re-click MINT's cell.
+			// Discover MINT, then OCEAN (making OCEAN active), then re-click MINT's cell.
 			const gameState = playActions([click(0, 0), click(4, 1), click(0, 0)]);
 			expect(gameState.movesUsed).toBe(2);
 			expect(gameState.activeWord).toBe("MINT");

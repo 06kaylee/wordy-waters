@@ -33,7 +33,7 @@ crossword-style clues, then guess the words.
 ### Board Layout
 
 - Grid: 5x5
-- Words: 4 hardcoded words (MINT, PLAN, LEAD, BARK)
+- Words: 4 hardcoded words (MINT, JAM, OCEAN, BARK)
 - Word Placement: Fixed for MVP testing
 - No Overlaps: Words don't share cells
 
@@ -157,10 +157,9 @@ CREATE TABLE words (
   id UUID PRIMARY KEY,
   board_id UUID NOT NULL REFERENCES boards(id),
   word VARCHAR(50) NOT NULL,
-  length INTEGER NOT NULL,
   start_row INTEGER NOT NULL,
   start_col INTEGER NOT NULL,
-  direction VARCHAR(20) NOT NULL,     -- 'horizontal' | 'vertical' | 'diagonal'
+  direction VARCHAR(20) NOT NULL,     -- 'horizontal' | 'vertical'
   is_guessed BOOLEAN DEFAULT FALSE,
   guessed_at TIMESTAMP,
   created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
@@ -172,7 +171,6 @@ CREATE TABLE words (
 | `id`                      | Unique word identifier                                         |
 | `board_id`                | Link to board (query all words on this board)                  |
 | `word`                    | The actual word (for validation when player guesses)           |
-| `length`                  | Word length (for clue display)                                 |
 | `start_row` / `start_col` | Starting position (for click validation)                       |
 | `direction`               | Needed to validate which cells are part of the word            |
 | `is_guessed`              | Fast win condition check (`COUNT(*) WHERE is_guessed = FALSE`) |
@@ -203,11 +201,11 @@ a time on player request.
 ## Hardcoded Test Board
 
 ```
-[M][ ][ ][ ][B]
-[I][P][ ][ ][A]
-[N][ ][L][ ][R]
-[T][ ][ ][A][K]
-[L][E][A][D][N]
+[M][ ][ ][J][B]
+[I][ ][ ][A][A]
+[N][ ][ ][M][R]
+[T][ ][ ][ ][K]
+[O][C][E][A][N]
 ```
 
 ### Words
@@ -215,19 +213,18 @@ a time on player request.
 1. **MINT** — [0,0] vertical (down 4)
    Clues: "In perfect condition (4)", "Place that makes coins (4)", "Fresh
    herb (4)"
-2. **PLAN** — [1,1] diagonal (4)
-   Clues: "Drawing or blueprint (4)", "Strategy or scheme (4)", "To arrange
-   in advance (4)"
-3. **LEAD** — [4,0] horizontal (right 4)
-   Clues: "Heavy metal (4)", "Leash for a dog (4)", "Go first (4)"
+2. **JAM** — [0,3] vertical (down 3)
+   Clues: "Sticky situation (3)", "Musicians' impromptu session (3)", "Fruit
+   spread for toast (3)"
+3. **OCEAN** — [4,0] horizontal (right 5)
+   Clues: "A drop in the ___ (5)", "Pacific or Atlantic (5)", "Very large body
+   of salt water (5)"
 4. **BARK** — [0,4] vertical (down 4)
    Clues: "Sailing vessel (4)", "Dog's sound (4)", "Tree's outer layer (4)"
 
-> Note: PLAN's direction is diagonal per the current board layout (GDD
-> Section 10), which resolved an earlier overlap conflict with BARK. If this
-> spec and the GDD ever disagree on a word's placement, the GDD is the
-> source of truth — flag the discrepancy rather than guessing which is
-> current.
+> Note: If this spec and the GDD ever disagree on a word's placement, the
+> GDD is the source of truth — flag the discrepancy rather than guessing
+> which is current.
 
 ## API Endpoints (Planned)
 
@@ -295,8 +292,10 @@ move cost creates meaningful tension in exploration.
 
 - `direction` in WORDS: needed to validate if clicked cell is part of word
 - `start_row`/`start_col` in WORDS: needed for click validation
-- `length` in WORDS: could calculate from word string, but clearer and
-  useful for clues
+- No `length` column in WORDS: it is derivable from `word`, and storing it
+  separately risks the two drifting apart. The server computes it when
+  building the puzzle response, which sends `length` to the client but never
+  `word`.
 - `is_guessed` in WORDS: fast win condition check
   (`COUNT(*) WHERE is_guessed = FALSE`)
 - `moves_used` in GAMES: needed for score rating display on game completion

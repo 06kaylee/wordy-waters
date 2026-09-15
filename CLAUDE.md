@@ -88,9 +88,8 @@ most. Only create a component folder when there are actual companion files
   don't assume either way; ask or flag it if it comes up.
 - Move costs: 1 per hidden-cell click (word or empty), 0 to re-click an
   already-discovered cell, +2 for a wrong guess, +0 for a correct guess.
-- Test board words: MINT, LEAD, PLAN, BARK. PLAN runs diagonally from
-  `[1,1]` to `[4,4]` (resolved a conflict with BARK at `[1,4]`). Clue arrays
-  (`mintClues`, `leadClues`, `planClues`, `barkClues`) already exist.
+- Test board words: MINT (4), JAM (3), OCEAN (5), BARK (4). Clues live on
+  each entry in the `WORDS` constant in `puzzleData.ts`.
 
 ## Design & Learning Principles
 
