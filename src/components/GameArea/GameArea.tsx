@@ -1,6 +1,6 @@
 import { useEffect, useReducer, useState } from "react";
 import GameBoard from "../GameBoard";
-import GameStats from "../GameStats";
+import GameStats from "../GameStats/GameStats";
 import styles from "./GameArea.module.css";
 import { gameReducer, initialGameState } from "../../game/gameReducer";
 import CluePanel from "../CluePanel";

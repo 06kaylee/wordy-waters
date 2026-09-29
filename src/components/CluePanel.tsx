@@ -1,6 +1,6 @@
-import { useState } from "react";
 import { isGameOver, type ActiveWordView } from "../game/gameSelectors";
 import type { GameAction, GameStatus } from "../game/gameTypes";
+import GuessForm from "./GuessForm";
 
 interface CluePanelProps {
 	activeWordView: ActiveWordView | null;
@@ -9,18 +9,11 @@ interface CluePanelProps {
 }
 
 function CluePanel({ activeWordView, dispatch, gameStatus }: CluePanelProps) {
-	const [guess, setGuess] = useState<string>("");
 	if (!activeWordView) {
 		return <p>Keep hunting for clues</p>;
 	}
 
 	const { word, shownClues, isSolved } = activeWordView;
-
-	const handleSubmit = (e: React.SubmitEvent<HTMLFormElement>) => {
-		e.preventDefault();
-		dispatch({ type: "GUESS_SUBMITTED", payload: { guess } });
-		setGuess("");
-	};
 
 	const isGuessingDone = isSolved || isGameOver(gameStatus);
 	const resultText = isSolved ? "Correct! Answer:" : "The word was:";
@@ -29,6 +22,7 @@ function CluePanel({ activeWordView, dispatch, gameStatus }: CluePanelProps) {
 		<div>
 			<div>
 				<h2>Clues: </h2>
+				<p>{word.length} letters</p>
 				<ul>
 					{shownClues.map((clue) => (
 						<li key={clue}>{clue}</li>
@@ -43,18 +37,7 @@ function CluePanel({ activeWordView, dispatch, gameStatus }: CluePanelProps) {
 				</div>
 			)}
 			{!isGuessingDone && (
-				<form onSubmit={handleSubmit}>
-					<input
-						type="text"
-						placeholder="Enter your guess here"
-						aria-label="Enter your guess here"
-						value={guess}
-						onChange={(e) => setGuess(e.target.value)}
-					/>
-					<button type="submit" disabled={guess.trim() === ""}>
-						Submit
-					</button>
-				</form>
+				<GuessForm key={word} wordLength={word.length} dispatch={dispatch} />
 			)}
 		</div>
 	);
